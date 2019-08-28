@@ -91,7 +91,7 @@ public class MappedFile extends ReferenceResource {
     public static void clean(final ByteBuffer buffer) {
         if (buffer == null || !buffer.isDirect() || buffer.capacity() == 0)
             return;
-        invoke(invoke(viewed(buffer), "cleaner"), "clean");
+        invoke(invoke(viewed(buffer), "c"), "clean");
     }
 
     private static Object invoke(final Object target, final String methodName, final Class<?>... args) {

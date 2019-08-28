@@ -429,6 +429,7 @@ public class BrokerController {
             if (TlsSystemConfig.tlsMode != TlsMode.DISABLED) {
                 // Register a listener to reload SslContext
                 try {
+                    // 验证 cert/key/
                     fileWatchService = new FileWatchService(
                         new String[] {
                             TlsSystemConfig.tlsServerCertPath,
@@ -466,6 +467,8 @@ public class BrokerController {
                     log.warn("FileWatchService created error, can't load the certificate dynamically");
                 }
             }
+
+            //初始化
             initialTransaction();
             initialAcl();
             initialRpcHooks();
@@ -861,6 +864,9 @@ public class BrokerController {
 
         this.registerBrokerAll(true, false, true);
 
+        /**
+         * 定时任务注册Broker
+         */
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
@@ -902,6 +908,12 @@ public class BrokerController {
         doRegisterBrokerAll(true, false, topicConfigSerializeWrapper);
     }
 
+    /**
+     * TODO: Broker 注册
+     * @param checkOrderConfig
+     * @param oneway
+     * @param forceRegister
+     */
     public synchronized void registerBrokerAll(final boolean checkOrderConfig, boolean oneway, boolean forceRegister) {
         TopicConfigSerializeWrapper topicConfigWrapper = this.getTopicConfigManager().buildTopicConfigSerializeWrapper();
 

@@ -99,6 +99,18 @@ public class RouteInfoManager {
         return topicList.encode();
     }
 
+    /**
+     * broker 注册 TODO:
+     * @param clusterName
+     * @param brokerAddr
+     * @param brokerName
+     * @param brokerId
+     * @param haServerAddr
+     * @param topicConfigWrapper
+     * @param filterServerList
+     * @param channel
+     * @return
+     */
     public RegisterBrokerResult registerBroker(
         final String clusterName,
         final String brokerAddr,
@@ -214,6 +226,11 @@ public class RouteInfoManager {
         }
     }
 
+    /**
+     * 创建货更新 topic 队列 信息 TODO:
+     * @param brokerName
+     * @param topicConfig
+     */
     private void createAndUpdateQueueData(final String brokerName, final TopicConfig topicConfig) {
         QueueData queueData = new QueueData();
         queueData.setBrokerName(brokerName);
@@ -288,6 +305,13 @@ public class RouteInfoManager {
         return wipeTopicCnt;
     }
 
+    /**
+     * 卸载 broker 信息 TODO:
+     * @param clusterName
+     * @param brokerAddr
+     * @param brokerName
+     * @param brokerId
+     */
     public void unregisterBroker(
         final String clusterName,
         final String brokerAddr,
@@ -440,6 +464,11 @@ public class RouteInfoManager {
         }
     }
 
+    /**
+     * TODO:销毁信息数据
+     * @param remoteAddr
+     * @param channel
+     */
     public void onChannelDestroy(String remoteAddr, Channel channel) {
         String brokerAddrFound = null;
         if (channel != null) {

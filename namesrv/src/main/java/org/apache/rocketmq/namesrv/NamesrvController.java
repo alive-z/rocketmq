@@ -42,22 +42,27 @@ import org.apache.rocketmq.srvutil.FileWatchService;
 public class NamesrvController {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
 
+    // namesrv 配置
     private final NamesrvConfig namesrvConfig;
-
+    // netty 配置
     private final NettyServerConfig nettyServerConfig;
 
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryImpl(
         "NSScheduledThread"));
+
+    // kV config 管理
     private final KVConfigManager kvConfigManager;
+    // route 信息管理
     private final RouteInfoManager routeInfoManager;
-
+    //远程服务
     private RemotingServer remotingServer;
-
+    //Broker 活跃管理
     private BrokerHousekeepingService brokerHousekeepingService;
-
+    // 线程池
     private ExecutorService remotingExecutor;
-
+    // 配置
     private Configuration configuration;
+    //文件
     private FileWatchService fileWatchService;
 
     public NamesrvController(NamesrvConfig namesrvConfig, NettyServerConfig nettyServerConfig) {
@@ -73,27 +78,33 @@ public class NamesrvController {
         this.configuration.setStorePathFromConfig(this.namesrvConfig, "configStorePath");
     }
 
+    /**
+     * 初始化
+     * @return
+     */
     public boolean initialize() {
-
+        // 初始化kv config
         this.kvConfigManager.load();
-
+        // 初始化NettyServer TODO:
         this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.brokerHousekeepingService);
-
+        // 初始化线程池 TODO:
         this.remotingExecutor =
             Executors.newFixedThreadPool(nettyServerConfig.getServerWorkerThreads(), new ThreadFactoryImpl("RemotingExecutorThread_"));
 
+        // 注册处理器
         this.registerProcessor();
 
+        //定期扫描并剔除不活跃的Broker
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
-
             @Override
             public void run() {
+
                 NamesrvController.this.routeInfoManager.scanNotActiveBroker();
             }
         }, 5, 10, TimeUnit.SECONDS);
 
+        //定期打印配置
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
-
             @Override
             public void run() {
                 NamesrvController.this.kvConfigManager.printAllPeriodically();
@@ -103,6 +114,7 @@ public class NamesrvController {
         if (TlsSystemConfig.tlsMode != TlsMode.DISABLED) {
             // Register a listener to reload SslContext
             try {
+                //
                 fileWatchService = new FileWatchService(
                     new String[] {
                         TlsSystemConfig.tlsServerCertPath,
@@ -141,17 +153,24 @@ public class NamesrvController {
         return true;
     }
 
+    /**
+     * 注册处理器
+     */
     private void registerProcessor() {
         if (namesrvConfig.isClusterTest()) {
-
+            // 注册集群测试默认处理器
             this.remotingServer.registerDefaultProcessor(new ClusterTestRequestProcessor(this, namesrvConfig.getProductEnvName()),
                 this.remotingExecutor);
         } else {
-
+            // 注册集群测试默认处理器
             this.remotingServer.registerDefaultProcessor(new DefaultRequestProcessor(this), this.remotingExecutor);
         }
     }
 
+    /**
+     * 启动
+     * @throws Exception
+     */
     public void start() throws Exception {
         this.remotingServer.start();
 
@@ -160,6 +179,9 @@ public class NamesrvController {
         }
     }
 
+    /**
+     * 停止多线程
+     */
     public void shutdown() {
         this.remotingServer.shutdown();
         this.remotingExecutor.shutdown();

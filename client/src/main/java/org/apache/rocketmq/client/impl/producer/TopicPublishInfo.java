@@ -18,6 +18,8 @@ package org.apache.rocketmq.client.impl.producer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.rocketmq.client.common.ThreadLocalIndex;
 import org.apache.rocketmq.common.message.MessageQueue;
 import org.apache.rocketmq.common.protocol.route.QueueData;
@@ -115,5 +117,11 @@ public class TopicPublishInfo {
 
     public void setTopicRouteData(final TopicRouteData topicRouteData) {
         this.topicRouteData = topicRouteData;
+    }
+
+    public static void main(String[] args) {
+        AtomicInteger times = new AtomicInteger(0);
+        times.updateAndGet(v->v + 110);
+        System.out.println(times);
     }
 }
